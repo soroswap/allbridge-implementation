@@ -1,0 +1,23 @@
+{
+  "name": "allbridge-implementation",
+  "version": "1.0.0",
+  "description": "AllBridge testing grounds",
+  "repository": "https://github.com/soroswap/allbridge-implementation.git",
+  "author": "coderipper <hello@joaquinsoza.dev>",
+  "license": "MIT",
+  "scripts": {
+    "classic": "node src/allBridgeClassic.js",
+    "core": "ts-node src/allBridgeCore"
+  },
+  "dependencies": {
+    "@allbridge/bridge-core-sdk": "^3.12.2",
+    "@stellar/stellar-sdk": "^11.3.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.11.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.6"
+  }
+}
