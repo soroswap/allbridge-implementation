@@ -4,7 +4,9 @@ import {
   ChainSymbol,
   nodeRpcUrlsDefault,
 } from "@allbridge/bridge-core-sdk";
+import { Keypair } from "@stellar/stellar-sdk";
 
+// Initializing Allbridge SDK
 const allBridgeSdk = new AllbridgeCoreSdk({
   ...nodeRpcUrlsDefault,
   BSC: process.env.BSC_RPC,
@@ -22,16 +24,15 @@ async function getConfig() {
 async function main() {
   const config = await getConfig();
 
-  // const stellarAccount = Keypair.fromSecret(config.stellarSecret);
+  // loads stellar secret
+  const stellarAccount = Keypair.fromSecret(config.stellarSecret);
 
+  // Returns all supported chains
   const supportedChains = await allBridgeSdk.chainDetailsMap();
 
-  // extract information about Stellar chain
-  const supportedChainForStellar = supportedChains[ChainSymbol.STLR];
-
-  // Is undefined... Allbridge Core currently does not support Stellar, is still in development for the Soroban chain.
-  // Will get back to this when is supported, in the meantime, experiments with Allbridge Classic are in allBridgeClassic.js
-  console.log("🚀 « supportedChainForStellar:", supportedChainForStellar);
+  // extract information about Soroban chain
+  const supportedChainForSoroban = supportedChains[ChainSymbol.SRB];
+  console.log("🚀 « supportedChainForSoroban:", supportedChainForSoroban);
 
   process.exit();
 }
