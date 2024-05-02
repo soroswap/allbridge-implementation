@@ -10,7 +10,7 @@
     "core": "ts-node src/allBridgeCore"
   },
   "dependencies": {
-    "@allbridge/bridge-core-sdk": "^3.12.2",
+    "@allbridge/bridge-core-sdk": "^3.13.0",
     "@stellar/stellar-sdk": "^11.3.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.11.1",
