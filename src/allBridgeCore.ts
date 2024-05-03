@@ -21,9 +21,7 @@ import * as fs from "fs";
 const allBridgeSdk = new AllbridgeCoreSdk({
   ...nodeRpcUrlsDefault,
   BSC: process.env.BSC_RPC,
-  STLR: process.env.STLR_RPC,
   SRB: process.env.SRB_RPC,
-  ETH: process.env.ETH_RPC,
 });
 
 // Helper function to load ABI definitions from local files.

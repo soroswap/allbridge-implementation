@@ -21,9 +21,35 @@ This script interacts with the Allbridge Core SDK, now fully supporting bridging
 - **Transaction Execution:** Handles the bridging of tokens from BSC to Soroban and vice versa, including setup of trust lines on Soroban when needed.
 - **Error Handling and Transaction Confirmations:** Manages errors during the bridging process and confirms transactions across chains to ensure reliability and consistency.
 
-## Strategic Decision to Focus on Allbridge Core
+## Testing
 
-### Updates and Future Proofing
+### Setup
 
-- **Latest Updates:** Allbridge Core has recently been updated to support asset transfers between BSC and Soroban on the Stellar network. This allows us to effectively bridge between these and other supported chains, aligning with our goal to offer a wide range of cross-chain transaction capabilities within Soroswap.
-- **Deprecation of Classic:** The Allbridge Classic system will be deprecated in favor of Allbridge Core, which offers broader chain support and more advanced features.
+Before you start testing, ensure that all dependencies are installed and environment variables are set up correctly:
+
+1. **Install Dependencies:**
+   Run `yarn install` to install the required packages.
+
+2. **Environment Configuration:**
+   Set up your environment variables using `.env.example` as a template. Rename `.env.example` to `.env` and replace the placeholder values with your actual configuration details.
+
+### Running Tests
+
+To execute the tests, use the command `yarn core`. This script will perform the following actions:
+
+- **Bridging USDC from Soroban to USDT on BSC:** This operation bridges 1 USDC from the Soroban network on Stellar to 1 USDT on the Binance Smart Chain (BSC).
+- **Bridging USDT from BSC to USDC on Soroban:** Following the first bridge, it will bridge 1 USDT from BSC back to 1 USDC on Soroban.
+
+### Important Notes
+
+- **Transaction Time:** Keep in mind that each bridge transaction can take a few minutes to complete. If you do not have at least 1 USDC and 1 USDT on both accounts, it is recommended to manage the transactions sequentially to avoid errors due to insufficient funds.
+- **Sequential Bridging:** If you are testing with limited funds, you can modify the script to perform the transactions one at a time:
+
+  - **First Transaction:** Comment out the lines for `bridgeFromBscToStellar` (lines 261 to 267) and run the script. This will execute the bridge from Soroban to BSC. Wait for this transaction to complete by checking the corresponding blockchain explorer.
+  - **Second Transaction:** Once the first transaction is confirmed, comment out the lines for `bridgeFromStellarToBnb` (lines 252 to 258) and uncomment the previously commented lines to perform the bridge from BSC back to Soroban.
+
+- **Sufficient Funds:** If you have more than 1 unit of USD in the form of USDC and USDT on both blockchains, you can execute both bridging operations one after the other without waiting.
+
+### Monitoring
+
+Monitor transaction statuses and progress through the respective blockchain explorers for Soroban and BSC. This will help you verify that the bridges are completed successfully.
