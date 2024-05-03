@@ -1,7 +1,6 @@
 import "dotenv/config";
 import {
   AllbridgeCoreSdk,
-  AmountFormat,
   ChainSymbol,
   FeePaymentMethod,
   Messenger,
@@ -10,17 +9,13 @@ import {
   mainnet,
   nodeRpcUrlsDefault,
 } from "@allbridge/bridge-core-sdk";
-import {
-  BASE_FEE,
-  Keypair,
-  Operation,
-  SorobanRpc,
-  TimeoutInfinite,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Keypair, SorobanRpc, TransactionBuilder } from "@stellar/stellar-sdk";
 import { ethers } from "ethers";
 import { ensure } from "./utils/utils";
 import Big from "big.js";
+import * as fs from "fs";
+
+//Docs: https://github.com/allbridge-io/allbridge-core-js-sdk/tree/7219e7f4171f2ae4e881f233a0b34b683183915b
 
 // Initializing Allbridge SDK
 const allBridgeSdk = new AllbridgeCoreSdk({
@@ -30,6 +25,13 @@ const allBridgeSdk = new AllbridgeCoreSdk({
   SRB: process.env.SRB_RPC,
   ETH: process.env.ETH_RPC,
 });
+
+// Helper function to load ABI definitions from local files.
+async function loadAbi(file: string) {
+  const path = `${__dirname}/abi/${file}`;
+  const abi = fs.readFileSync(path, { encoding: "utf-8" });
+  return JSON.parse(abi);
+}
 
 // loads stellar secret
 const stellarAccount = Keypair.fromSecret(process.env.STELLAR_PRIVATE_KEY!);
@@ -49,24 +51,64 @@ async function bridgeFromBscToStellar(
   if (!sourceToken || !destinationToken) {
     throw new Error("usdt and usdc are null");
   }
-  console.log("🚀 « sourceToken:", sourceToken);
 
-  const rawTransactionApprove = await allBridgeSdk.bridge.rawTxBuilder.approve(
-    bscProvider,
-    {
-      token: sourceToken,
-      owner: fromAddress,
+  const allowanceAmount = await allBridgeSdk.bridge.getAllowance({
+    token: sourceToken,
+    owner: fromAddress,
+  });
+  console.log("🚀 « allowanceAmount:", allowanceAmount);
+
+  const allowance = await allBridgeSdk.bridge.checkAllowance({
+    token: sourceToken,
+    owner: fromAddress,
+    amount: amount,
+  });
+
+  // approving the bridge smart contract to spend the tokens using allbridge, allbridge will set the allowance to the max,
+  // if we want to set this manually to a specific amount, we would need to do it manually using ethersjs/web3js and loading the token abi and contract
+  if (!allowance) {
+    const rawTransactionApprove =
+      await allBridgeSdk.bridge.rawTxBuilder.approve({
+        token: sourceToken,
+        owner: fromAddress,
+      });
+    try {
+      const txResponse = await bscWallet.sendTransaction(
+        rawTransactionApprove as ethers.TransactionResponse
+      );
+      const approveReceipt = await txResponse.wait();
+      console.log("🚀 « approveReceipt:", approveReceipt);
+    } catch (error) {
+      console.log("🚀 « error:", error);
+      throw new Error("error approving bridge contract");
     }
-  );
-  console.log("🚀 « rawTransactionApprove:", rawTransactionApprove);
+  }
 
-  // There is a check allowance but is returning an error "Cannot read properties of undefined (reading 'Contract')"
-  // const allowance = await allBridgeSdk.bridge.checkAllowance(bscProvider, {
-  //   token: sourceToken,
-  //   owner: fromAddress,
-  //   amount: "1.01",
-  // });
-  // console.log("🚀 « allowance:", allowance);
+  // Bridging!
+  // if using Web3 js apparently it could be easy to just pass the Web3 provider to the send function and there
+  // would be no need to get the rawTxBuilder and it would just use the loaded account on web3 provider,
+  // But since im using ethers here, i need to get the raw transaction and send it manually
+
+  // Bridge fees can be paid either with the stablecoin or native currency, in this case im using native
+  const sendParams: SendParams = {
+    amount,
+    fromAccountAddress: fromAddress,
+    toAccountAddress: toAddress,
+    sourceToken,
+    destinationToken,
+    messenger: Messenger.ALLBRIDGE,
+    gasFeePaymentMethod: FeePaymentMethod.WITH_NATIVE_CURRENCY,
+  };
+  const rawBridgeTransaction = await allBridgeSdk.bridge.rawTxBuilder.send(
+    sendParams
+  );
+  try {
+    const txResponse = await bscWallet.sendTransaction(
+      rawBridgeTransaction as ethers.TransactionResponse
+    );
+    const bridgeReceipt = await txResponse.wait();
+    console.log("🚀 « bridgeReceipt:", bridgeReceipt);
+  } catch (error) {}
 }
 
 async function bridgeFromStellarToBnb(
@@ -208,18 +250,20 @@ async function main() {
     sorobanChain.tokens.find((token) => token.symbol === "USDC")
   );
 
-  // await bridgeFromStellarToBnb(
-  //   stellarAccount.publicKey(),
-  //   bscWallet.address,
-  //   "1",
-  //   usdcTokenSrb,
-  //   usdtTokenBsc
-  // );
+  // Bridging from Stellar to BNB
+  await bridgeFromStellarToBnb(
+    stellarAccount.publicKey(),
+    bscWallet.address,
+    "1",
+    usdcTokenSrb,
+    usdtTokenBsc
+  );
 
+  // Bridging from BNB to Stellar
   await bridgeFromBscToStellar(
     bscWallet.address,
     stellarAccount.publicKey(),
-    "3",
+    "1",
     usdtTokenBsc,
     usdcTokenSrb
   );

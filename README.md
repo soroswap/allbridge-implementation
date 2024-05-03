@@ -6,37 +6,24 @@ This repository contains scripts that interface with Allbridge for cross-chain t
 
 ## Scripts
 
-### 1. `allBridgeClassic.js`
+### 1. `allBridgeClassic.js` (Deprecated)
 
-This script utilizes the Allbridge API to facilitate cross-chain transactions between Stellar and other blockchains supported by Allbridge. It is designed to interact with the Allbridge Classic bridge system but is not completed as we await further developments from Allbridge.
-
-**Key Components:**
-
-- **Environment Setup:** Loads configuration from environment variables.
-- **Token Support Fetching:** Fetches supported tokens and their details for cross-chain transactions.
-- **Transaction Management:** Manages cross-chain transactions and handles errors during the process.
+This script was utilizing the Allbridge Classic API to facilitate cross-chain transactions between Stellar and other blockchains supported by Allbridge. However, it will no longer be maintained or used as we shift our focus to the more advanced Allbridge Core system.
 
 ### 2. `allBridgeCore.ts`
 
-This newer script interfaces with the Allbridge Core SDK, which is expected to support more blockchains and features, including the new Soroban platform on Stellar. It checks for the supported chains and their capabilities.
+This script interacts with the Allbridge Core SDK, now fully supporting bridging between Soroban on Stellar and Binance Smart Chain (BSC), among other blockchains. The script demonstrates our capability to bridge assets like USDT and USDC between these networks, fully utilizing the latest features of the Allbridge Core.
 
 **Key Components:**
 
-- **SDK Initialization:** Sets up the Allbridge Core SDK with customized RPC URLs.
-- **Chain Details Fetching:** Retrieves detailed information about the supported chains, focusing particularly on the Soroban platform.
+- **SDK Initialization:** Initializes the Allbridge Core SDK with custom RPC URLs for supported blockchains including BSC and Soroban.
+- **Chain and Token Details:** Retrieves detailed information and capabilities of supported chains, specifically focusing on bridging operations between BSC and Soroban.
+- **Transaction Execution:** Handles the bridging of tokens from BSC to Soroban and vice versa, including setup of trust lines on Soroban when needed.
+- **Error Handling and Transaction Confirmations:** Manages errors during the bridging process and confirms transactions across chains to ensure reliability and consistency.
 
-## Strategic Decision to Wait
+## Strategic Decision to Focus on Allbridge Core
 
-### Current Status of Soroban Integration
+### Updates and Future Proofing
 
-The Allbridge Core SDK recognizes the Soroban chain, but as of now, it does not support any tokens for bridging. The object returned for Soroban includes essential details like chain symbol, transfer times, and transaction costs but lacks active tokens, which are crucial for our operations on Soroswap.
-
-### Why Wait?
-
-- **Future Compatibility:** Integrating Allbridge Classic might provide a short-term solution, but it lacks the broader chain support and advanced features that Allbridge Core will offer. Waiting for the complete integration of Soroban in Allbridge Core ensures that Soroswap remains compatible with future blockchain technologies and standards.
-- **Resource Efficiency:** Integrating a system that is still under significant development (like Allbridge Core with Soroban) could require continuous revisions and updates to keep up with changes. Waiting allows us to allocate our resources more efficiently by integrating a more stable and feature-complete version once available.
-- **User Experience:** Providing a stable, reliable, and expansive bridging solution enhances user trust and satisfaction. Premature integration may lead to issues that could affect user experience negatively.
-
-### Moving Forward
-
-Our team closely monitors the developments from Allbridge regarding Soroban support. We are committed to integrating Allbridge Core into Soroswap as soon as it offers a robust set of features that meet our requirements for a seamless and efficient user experience. This strategic patience aligns with our goal to provide a cutting-edge, reliable platform for our users.
+- **Latest Updates:** Allbridge Core has recently been updated to support asset transfers between BSC and Soroban on the Stellar network. This allows us to effectively bridge between these and other supported chains, aligning with our goal to offer a wide range of cross-chain transaction capabilities within Soroswap.
+- **Deprecation of Classic:** The Allbridge Classic system will be deprecated in favor of Allbridge Core, which offers broader chain support and more advanced features.
